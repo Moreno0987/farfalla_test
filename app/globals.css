@@ -1,57 +1,255 @@
+/* app/globals.css */
+
+/* 1. Import Fonts - Selalu letakkan di paling atas */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+/* 2. Tailwind Directives */
 @import "tailwindcss";
 
-/* =========================
-   FARFALLA DESIGN SYSTEM
-========================= */
+/* 3. Design System Variables */
 :root {
-  /* Background */
-  --bg-main: #fff1f5;       /* pink sangat muda */
-  --bg-card: #ffffff;
-
-  /* Colors */
-  --primary: #f472b6;       /* pink utama */
-  --primary-hover: #ec4899;
-  --accent: #fb7185;
-
-  /* Text */
-  --text-main: #1f2937;
-  --text-soft: #6b7280;
-
-  /* Border */
-  --border: #fbcfe8;
-
-  /* Font */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bali-dark: #1C1208;
+  --bali-brown: #2C2015;
+  --bali-brown-mid: #3D2D1A;
+  --bali-tan: #8B6C42;
+  --bali-gold: #C8963E;
+  --bali-gold-light: #D4AA5C;
+  --bali-cream: #F5EDD8;
+  --bali-cream-light: #FAF5EB;
+  --bali-muted: #A89070;
+  --bali-sage: #1D9E75;
+  --bali-border: #E8DDD0;
+  --bali-border-mid: #D4C4AC;
+  --text-primary: #2C2015;
+  --text-secondary: #8B6C42;
+  --bg-main: #FAF5EB;
 }
 
-/* =========================
-   BASE STYLE
-========================= */
+/* 4. Base Styles */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+html { 
+  scroll-behavior: smooth; 
+}
+
 body {
+  font-family: 'Inter', sans-serif;
   background-color: var(--bg-main);
-  color: var(--text-main);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  color: var(--bali-brown);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* =========================
-   UTILITIES (optional helper)
-========================= */
-.card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+/* 5. Typography */
+.serif { 
+  font-family: 'Cormorant Garamond', Georgia, serif; 
+}
+
+/* 6. Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bali-cream-light); }
+::-webkit-scrollbar-thumb { 
+  background: var(--bali-gold-light); 
+  border-radius: 3px; 
+}
+
+/* 7. Components & Utilities */
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bali-tan);
+  font-weight: 500;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 0.5px solid var(--bali-border-mid);
+  color: var(--bali-tan);
+}
+
+.tag-gold {
+  background: #F5EDD8;
+  color: #7A5C1E;
+  border: 0.5px solid var(--bali-gold-light);
 }
 
 .btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border-radius: 8px;
-  padding: 8px 12px;
-  transition: 0.2s ease;
+  background: var(--bali-brown);
+  color: var(--bali-cream);
+  border: none;
+  padding: 10px 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-hover);
+.btn-primary:hover { 
+  background: var(--bali-brown-mid); 
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--bali-brown);
+  border: 0.5px solid var(--bali-border-mid);
+  padding: 9px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-outline:hover { 
+  background: var(--bali-cream); 
+  border-color: var(--bali-tan); 
+}
+
+.btn-bali {
+  border: 1px solid var(--bali-brown);
+  color: var(--bali-brown);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+  background: transparent;
+}
+
+.btn-bali:hover { 
+  background: var(--bali-brown); 
+  color: var(--bali-cream); 
+}
+
+.pcard {
+  background: white;
+  border: 0.5px solid var(--bali-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pcard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(44, 32, 21, 0.1);
+}
+
+.star { 
+  color: var(--bali-gold); 
+  font-size: 11px; 
+}
+
+.tab {
+  padding: 8px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--bali-tan);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--bali-brown); }
+.tab.active { 
+  color: var(--bali-brown); 
+  border-bottom-color: var(--bali-tan); 
+  font-weight: 500; 
+}
+
+.divider { 
+  height: 0.5px; 
+  background: var(--bali-border); 
+  margin: 1.5rem 0; 
+}
+
+/* 8. Cart Drawer */
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 18, 8, 0.4);
+  z-index: 40;
+  animation: fadeIn 0.2s ease;
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 380px;
+  max-width: 100vw;
+  background: #fff;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(28, 18, 8, 0.15);
+  animation: slideInRight 0.25s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* 9. Forms */
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="number"], textarea, select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 0.5px solid var(--bali-border-mid);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  background: #fff;
+  color: var(--bali-brown);
+  transition: border-color 0.15s ease;
+  outline: none;
+}
+
+input[type="text"]:focus, input[type="email"]:focus,
+input[type="tel"]:focus, textarea:focus, select:focus {
+  border-color: var(--bali-tan);
+  box-shadow: 0 0 0 3px rgba(139, 108, 66, 0.1);
+}
+
+/* 10. Animations */
+@keyframes waPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.page-enter { 
+  animation: pageEnter 0.3s ease; 
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
