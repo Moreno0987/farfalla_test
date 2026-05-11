@@ -1,112 +1,95 @@
 "use client";
 
-import { supabase } from "@/lib/supabase/client";
+import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 type Product = {
   id: string;
   name: string;
   price: number;
+  description: string | null;
+  image_url: string | null;
 };
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { addToCart } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const handleAddToCart = async () => {
     if (loading) return;
+    setLoading(true);
 
     try {
-      setLoading(true);
+      const result = await addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url,
+      });
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      // 🔥 FIX UTAMA: simpan intent
-      if (!user) {
-        localStorage.setItem(
-          "postLoginAction",
-          JSON.stringify({
-            type: "add_to_cart",
-            product,
-          }),
-        );
-
+      if (result === "login") {
         router.push(`/login?redirect=/products`);
         return;
       }
 
-      const userId = user.id;
-
-      const { data: existingCart } = await supabase
-        .from("carts")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("status", "active")
-        .maybeSingle();
-
-      let cartId = existingCart?.id;
-
-      if (!cartId) {
-        const { data: newCart, error } = await supabase
-          .from("carts")
-          .insert([{ user_id: userId, status: "active" }])
-          .select()
-          .single();
-
-        if (error) throw error;
-        cartId = newCart.id;
-      }
-
-      const { data: existingItem } = await supabase
-        .from("cart_items")
-        .select("*")
-        .eq("cart_id", cartId)
-        .eq("product_id", product.id)
-        .maybeSingle();
-
-      if (existingItem) {
-        await supabase
-          .from("cart_items")
-          .update({
-            quantity: existingItem.quantity + 1,
-          })
-          .eq("id", existingItem.id);
-      } else {
-        await supabase.from("cart_items").insert([
-          {
-            cart_id: cartId,
-            product_id: product.id,
-            quantity: 1,
-          },
-        ]);
-      }
-
-      alert("Produk berhasil ditambahkan");
+      // Feedback visual
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
     } catch (err) {
       console.error("Add to cart error:", err);
-      alert("Gagal menambahkan produk");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow">
-      <h2 className="text-lg font-semibold">{product.name}</h2>
-      <p className="text-pink-500 font-bold">Rp {product.price}</p>
+    <div className="farfalla-card group">
+      {/* Image */}
+      <div className="farfalla-card-image">
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-[#f5ede8]">
+            <span className="text-4xl opacity-30">🦋</span>
+          </div>
+        )}
+        <div className="farfalla-card-overlay" />
+      </div>
 
-      <button
-        onClick={handleAddToCart}
-        disabled={loading}
-        className={`mt-3 w-full py-2 rounded-lg text-white ${
-          loading ? "bg-gray-400" : "bg-pink-400 hover:bg-pink-500"
-        }`}
-      >
-        {loading ? "Loading..." : "Add to Cart"}
-      </button>
+      {/* Content */}
+      <div className="farfalla-card-content">
+        <h3 className="farfalla-product-name">{product.name}</h3>
+        {product.description && (
+          <p className="farfalla-product-desc">{product.description}</p>
+        )}
+        <div className="farfalla-card-footer">
+          <span className="farfalla-price">
+            Rp {product.price.toLocaleString("id-ID")}
+          </span>
+          <button
+            onClick={handleAddToCart}
+            disabled={loading}
+            className={`farfalla-btn-cart ${added ? "added" : ""}`}
+          >
+            {loading ? (
+              <span className="btn-spinner" />
+            ) : added ? (
+              "✓ Ditambahkan"
+            ) : (
+              "Tambah"
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

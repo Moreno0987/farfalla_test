@@ -1,6 +1,12 @@
-"use client";
-
+import type { Metadata } from "next";
+import "./globals.css";
 import { CartProvider } from "@/app/context/CartContext";
+import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+  title: "Farfalla – Handmade dengan Cinta",
+  description: "Produk handmade lokal Indonesia dari tangan pengrajin pilihan",
+};
 
 export default function RootLayout({
   children,
@@ -8,9 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <Navbar />
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
