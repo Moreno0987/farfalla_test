@@ -95,7 +95,7 @@ export default function HomePage() {
       ) : products.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", color: "var(--bali-tan)", background: "#F5EDD8", borderRadius: 8 }}>
           <p className="serif" style={{ fontSize: 18, fontStyle: "italic" }}>Belum ada produk</p>
-          <p style={{ fontSize: 12, marginTop: 8 }}>Tambahkan produk di Supabase Dashboard terlebih dahulu.</p>
+          <p style={{ fontSize: 12, marginTop: 8 }}>Belum ada produk yang di uploud oleh admin</p>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12, marginBottom: "3rem" }}>
@@ -108,7 +108,7 @@ export default function HomePage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, marginBottom: "2.5rem" }}>
         <div className="pcard" style={{ padding: "1.25rem" }}>
           <div style={{ fontSize: 24, marginBottom: "0.75rem" }}>🏦</div>
-          <h3 style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Transfer Bank Otomatis</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Transfer Bank</h3>
           <p style={{ fontSize: 11, color: "var(--bali-tan)", lineHeight: 1.6, margin: "0 0 1rem" }}>Verifikasi pembayaran otomatis dalam 1 menit.</p>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {["BCA","Mandiri","BNI","BRI","GoPay","QRIS"].map(b => (
