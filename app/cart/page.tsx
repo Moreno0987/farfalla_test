@@ -42,7 +42,8 @@ export default function CartPage() {
 
   const fetchCart = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData?.user ?? null;
 
       if (!user) {
         setCartItems([]);
@@ -94,7 +95,11 @@ export default function CartPage() {
   };
 
   useEffect(() => {
-    fetchCart();
+    const loadCart = async () => {
+      await fetchCart();
+    };
+
+    void loadCart();
   }, []);
 
   // Fungsi hapus item (Opsional, tapi sangat disarankan)

@@ -1,116 +1,204 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr"; // ✅ ganti dari auth-helpers-nextjs
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [cooldown, setCooldown] = useState(() => {
-    if (typeof window === "undefined") return 0;
-
-    const savedTime = localStorage.getItem("otpCooldown");
-    if (!savedTime) return 0;
-
-    const remaining = Math.floor((parseInt(savedTime, 10) - Date.now()) / 1000);
-    return remaining > 0 ? remaining : 0;
-  });
-
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/";
+  const redirectTo = searchParams.get("redirect") || "/products";
+  const registered = searchParams.get("registered");
 
-  // ⏳ Countdown effect
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(
+    registered ? "Registrasi berhasil. Silakan login." : "",
+  );
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    if (cooldown <= 0) return;
-
-    const interval = setInterval(() => {
-      setCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          localStorage.removeItem("otpCooldown");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [cooldown]);
+    if (registered) {
+      setMessage("Registrasi berhasil. Silakan login.");
+    }
+  }, [registered]);
 
   const handleLogin = async () => {
-    if (loading || cooldown > 0) return;
+    setError("");
 
-    // 🔍 Validasi email sederhana
-    if (!email || !email.includes("@")) {
-      alert("Masukkan email yang valid");
+    if (!email || !password) {
+      setError("Email dan password harus diisi.");
       return;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    setLoading(true);
 
-    if (!baseUrl) {
-      alert("BASE URL belum diset di .env.local");
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (authError) {
+      setError(authError.message || "Login gagal, periksa kredensial.");
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${baseUrl}/auth/callback?redirect=${redirectTo}`,
-        },
-      });
-
-      if (error) {
-        console.error("Login error:", error);
-        alert(error.message);
-        return;
-      }
-
-      // ⏳ Set cooldown 60 detik
-      const expireTime = Date.now() + 60 * 1000;
-      localStorage.setItem("otpCooldown", expireTime.toString());
-      setCooldown(60);
-
-      alert("Cek email kamu untuk login");
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      alert("Terjadi kesalahan, coba lagi");
-    } finally {
-      setLoading(false);
+    if (data?.session) {
+      router.push(redirectTo);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded">
-      <h1 className="text-xl font-bold mb-4">Login</h1>
-
-      <input
-        type="email"
-        placeholder="Email"
-        className="border p-2 w-full mb-3 rounded"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <button
-        onClick={handleLogin}
-        disabled={loading || cooldown > 0}
-        className={`w-full py-2 rounded text-white transition ${
-          loading || cooldown > 0
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-pink-500 hover:bg-pink-600"
-        }`}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#F5EDD8",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 460,
+          background: "#ffffff",
+          borderRadius: 24,
+          boxShadow: "0 24px 80px rgba(44, 32, 21, 0.12)",
+          padding: "2rem",
+          fontFamily: "Georgia, serif",
+        }}
       >
-        {loading
-          ? "Mengirim..."
-          : cooldown > 0
-            ? `Tunggu ${cooldown}s`
-            : "Login"}
-      </button>
+        <p
+          style={{
+            fontSize: 12,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#8B6C42",
+            marginBottom: "0.75rem",
+          }}
+        >
+          Masuk ke Farfalla
+        </p>
+        <h1
+          style={{ fontSize: 32, margin: 0, fontWeight: 400, color: "#2C2015" }}
+        >
+          Login
+        </h1>
+        <p style={{ marginTop: "0.75rem", color: "#7A5C1E", lineHeight: 1.7 }}>
+          Masuk menggunakan email dan password kamu untuk melanjutkan belanja.
+        </p>
+
+        {message && (
+          <div
+            style={{
+              marginTop: "1.25rem",
+              padding: "1rem",
+              borderRadius: 16,
+              background: "#F7F0E5",
+              color: "#2C2015",
+              fontSize: 13,
+            }}
+          >
+            {message}
+          </div>
+        )}
+        {error && (
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "1rem",
+              borderRadius: 16,
+              background: "#FDECE4",
+              color: "#A7280E",
+              fontSize: 13,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div style={{ marginTop: "1.5rem", display: "grid", gap: "1rem" }}>
+          <label
+            style={{ display: "grid", gap: 6, fontSize: 12, color: "#8B6C42" }}
+          >
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@contoh.com"
+              style={{
+                width: "100%",
+                padding: "0.9rem 1rem",
+                borderRadius: 16,
+                border: "1px solid #E5D9C6",
+                outline: "none",
+                fontSize: 14,
+              }}
+            />
+          </label>
+
+          <label
+            style={{ display: "grid", gap: 6, fontSize: 12, color: "#8B6C42" }}
+          >
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minimal 8 karakter"
+              style={{
+                width: "100%",
+                padding: "0.9rem 1rem",
+                borderRadius: 16,
+                border: "1px solid #E5D9C6",
+                outline: "none",
+                fontSize: 14,
+              }}
+            />
+          </label>
+
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            style={{
+              width: "100%",
+              background: "#2C2015",
+              color: "#fff",
+              padding: "0.95rem 1rem",
+              borderRadius: 16,
+              border: "none",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? "Memproses..." : "Masuk"}
+          </button>
+        </div>
+
+        <p style={{ marginTop: "1.25rem", fontSize: 13, color: "#7A5C1E" }}>
+          Belum punya akun?{" "}
+          <Link
+            href="/register"
+            style={{ color: "#2C2015", textDecoration: "underline" }}
+          >
+            Daftar di sini
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
