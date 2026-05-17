@@ -1,15 +1,60 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import { ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 
 export default function Navbar() {
-  // Ambil data dari context
   const { getItemCount, toggleCart } = useCart();
   const count = getItemCount();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // ✅ createBrowserClient menggantikan createClientComponentClient
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    let subscription: any;
+
+    const fetchUser = async () => {
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+      setUser(currentUser);
+      setLoading(false);
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+
+      subscription = listener.subscription;
+    };
+
+    fetchUser();
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Pengguna";
 
   return (
     <header
@@ -86,6 +131,26 @@ export default function Navbar() {
             )}
           </button>
 
+          {!loading && (
+            <>
+              {user ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <span style={{ fontSize: 12, color: "#2C2015" }}>Halo, {displayName}</span>
+                  <button
+                    onClick={handleLogout}
+                    style={{ padding: "8px 12px", borderRadius: 9999, border: "1px solid #D4AA5C", background: "#fff", color: "#2C2015", cursor: "pointer", fontSize: 12 }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--bali-brown)", textDecoration: "none", border: "1px solid #D4AA5C", padding: "8px 14px", borderRadius: 9999 }}>
+                  Masuk
+                </Link>
+              )}
+            </>
+          )}
+
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -103,6 +168,15 @@ export default function Navbar() {
           <Link href="/" onClick={() => setMenuOpen(false)} style={{ fontSize: 13, color: "var(--bali-brown)", textDecoration: "none" }}>Beranda</Link>
           <Link href="/products" onClick={() => setMenuOpen(false)} style={{ fontSize: 13, color: "var(--bali-brown)", textDecoration: "none" }}>Koleksi</Link>
           <Link href="/products?category=custom" onClick={() => setMenuOpen(false)} style={{ fontSize: 13, color: "var(--bali-tan)", textDecoration: "none", fontWeight: 500 }}>Custom ✦</Link>
+          {user ? (
+            <button onClick={handleLogout} style={{ fontSize: 13, color: "#2C2015", border: "none", background: "none", textAlign: "left", padding: 0, cursor: "pointer" }}>
+              Logout
+            </button>
+          ) : (
+            <Link href="/login" onClick={() => setMenuOpen(false)} style={{ fontSize: 13, color: "#2C2015", textDecoration: "none" }}>
+              Masuk
+            </Link>
+          )}
         </div>
       )}
 
